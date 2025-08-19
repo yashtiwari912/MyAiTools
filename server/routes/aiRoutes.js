@@ -1,6 +1,7 @@
 import express from "express";
 import { auth } from "../middlewares/auth.js";
 import {
+    extractTextFromImage,
     generateArticle,
     generateBlogTitle,
     generateImage,
@@ -32,5 +33,5 @@ aiRouter.post(
 aiRouter.post("/resume-review", upload.single("resume"), auth, resumeReview);
 aiRouter.post("/summarize-pdf", upload.single("pdf"), auth, pdfSummarizer);
 aiRouter.post("/pdf-chat", auth, pdfChat);
-
+aiRouter.post("/extract-text", auth, upload.single("image"), extractTextFromImage);
 export default aiRouter;

@@ -6,6 +6,7 @@ import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 import pdf from "pdf-parse/lib/pdf-parse.js";
 import FormData from "form-data";
+import Tesseract from "tesseract.js";
 const AI = new OpenAI({
   apiKey: process.env.GEMINI_API_KEY,
   baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
@@ -345,3 +346,23 @@ export const pdfChat = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
+
+
+export const extractTextFromImage = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const image = req.file;
+
+    const { data: { text } } = await Tesseract.recognize(image.path, "eng");
+
+    await sql`INSERT INTO creations (user_id, prompt, content, type)
+        VALUES (${userId}, ${"Extracted text from image"}, ${text}, 'text')`;
+
+    res.json({ success: true, content: text });
+  } catch (error) {
+    console.error(error.message);
+    res.json({ success: false, message: error.message });
+  }
+};
+
