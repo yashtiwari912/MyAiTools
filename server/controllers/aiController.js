@@ -243,3 +243,105 @@ export const resumeReview = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+let pdfContext = {};
+export const pdfSummarizer = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const pdfFile = req.file;
+    const plan = req.plan;
+
+    if (plan !== "premium") {
+      return res.json({
+        success: false,
+        message: "This feature is only available for premium subscriptions",
+      });
+    }
+
+    if (pdfFile.size > 5 * 1024 * 1024) {
+      return res.json({
+        success: false,
+        message: "PDF file size exceeds allowed size (5MB).",
+      });
+    }
+
+    const dataBuffer = fs.readFileSync(pdfFile.path);
+    const pdfData = await pdf(dataBuffer);
+
+    // 👇 store context for chat later
+    pdfContext[userId] = pdfData.text;
+
+    const prompt = `Summarize the following PDF content into key points:\n\n${pdfData.text}`;
+
+    const response = await AI.chat.completions.create({
+      model: "gemini-2.0-flash",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+      max_tokens: 800,
+    });
+
+    const content = response.choices[0].message.content;
+
+    await sql`
+      INSERT INTO creations (user_id, prompt, content, type) 
+      VALUES (${userId}, 'Summarize uploaded PDF', ${content}, 'pdf-summarizer')
+    `;
+
+    res.json({ success: true, content });
+  } catch (error) {
+    console.error(error.message);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Chat
+ */
+export const pdfChat = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const { question } = req.body;
+    const plan = req.plan;
+
+    if (plan !== "premium") {
+      return res.json({
+        success: false,
+        message: "This feature is only available for premium subscriptions",
+      });
+    }
+
+    if (!question) {
+      return res.json({ success: false, message: "Please provide a question" });
+    }
+
+    if (!pdfContext[userId]) {
+      return res.json({
+        success: false,
+        message: "Please upload & summarize a PDF first.",
+      });
+    }
+
+    const prompt = `You are an assistant answering questions from a PDF. 
+    PDF Content:\n\n${pdfContext[userId]}\n\n
+    User Question: ${question}\n
+    Answer clearly and concisely:`;
+
+    const response = await AI.chat.completions.create({
+      model: "gemini-2.0-flash",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.5,
+      max_tokens: 1000,
+    });
+
+    const content = response.choices[0].message.content;
+
+    await sql`
+      INSERT INTO creations (user_id, prompt, content, type) 
+      VALUES (${userId}, ${question}, ${content}, 'pdf-chat')
+    `;
+
+    res.json({ success: true, answer: content });
+  } catch (error) {
+    console.error(error.message);
+    res.json({ success: false, message: error.message });
+  }
+};

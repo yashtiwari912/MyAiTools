@@ -4,6 +4,8 @@ import {
     generateArticle,
     generateBlogTitle,
     generateImage,
+    pdfChat,
+    pdfSummarizer,
     removeImageBackground,
     removeImageObject,
     resumeReview,
@@ -28,5 +30,7 @@ aiRouter.post(
     removeImageObject
 );
 aiRouter.post("/resume-review", upload.single("resume"), auth, resumeReview);
+aiRouter.post("/summarize-pdf", upload.single("pdf"), auth, pdfSummarizer);
+aiRouter.post("/pdf-chat", auth, pdfChat);
 
 export default aiRouter;

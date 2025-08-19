@@ -11,6 +11,7 @@ const navItems = [
     { to: '/ai/remove-background', lable: 'Remove Background', Icon: Eraser },
     { to: '/ai/remove-object', lable: 'Remove Object', Icon: Scissors },
     { to: '/ai/review-resume', lable: 'Review Resume', Icon: FileText },
+    { to: '/ai/pdf-summarizer', lable: 'DocuSense', Icon: Users },
     { to: '/ai/community', lable: 'Community', Icon: Users },
 ]
 
