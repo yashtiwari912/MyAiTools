@@ -33,5 +33,5 @@ aiRouter.post(
 aiRouter.post("/resume-review", upload.single("resume"), auth, resumeReview);
 aiRouter.post("/summarize-pdf", upload.single("pdf"), auth, pdfSummarizer);
 aiRouter.post("/pdf-chat", auth, pdfChat);
-aiRouter.post("/extract-text", auth, upload.single("image"), extractTextFromImage);
+aiRouter.post("/extract-text", auth, extractTextFromImage);
 export default aiRouter;

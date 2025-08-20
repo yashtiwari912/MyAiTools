@@ -6,14 +6,8 @@ import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 import pdf from "pdf-parse/lib/pdf-parse.js";
 import FormData from "form-data";
-import Tesseract from "tesseract.js";
 
-import path from "path";
-import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const wasmPath = path.join(__dirname, "public", "tesseract-core-simd.wasm");
 
 
 
@@ -361,20 +355,22 @@ export const pdfChat = async (req, res) => {
 
 export const extractTextFromImage = async (req, res) => {
   try {
+
     const { userId } = req.auth();
-    const image = req.file;
+    const { text } = req.body;
 
-    const { data: { text } } = await Tesseract.recognize(image.path, "eng", {//Fix ServerLess Enviroment Issue 
-      corePath: wasmPath
-    });
+    if (!text) {
+      return res.json({ success: false, message: "No text provided" });
+    }
 
-    await sql`INSERT INTO creations (user_id, prompt, content, type)
-        VALUES (${userId}, ${"Extracted text from image"}, ${text}, 'text')`;
+    await sql`
+      INSERT INTO creations (user_id, prompt, content, type)
+      VALUES (${userId}, ${"Extracted text from image"}, ${text}, 'text')
+    `;
 
     res.json({ success: true, content: text });
   } catch (error) {
-    console.error(error.message);
+    console.error("DB Save Error:", error);
     res.json({ success: false, message: error.message });
   }
 };
-
