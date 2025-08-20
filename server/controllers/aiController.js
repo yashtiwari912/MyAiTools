@@ -268,7 +268,7 @@ export const pdfSummarizer = async (req, res) => {
     const dataBuffer = fs.readFileSync(pdfFile.path);
     const pdfData = await pdf(dataBuffer);
 
-    // 👇 store context for chat later
+    // store context for chat later
     pdfContext[userId] = pdfData.text;
 
     const prompt = `Summarize the following PDF content into key points:\n\n${pdfData.text}`;
@@ -354,7 +354,9 @@ export const extractTextFromImage = async (req, res) => {
     const { userId } = req.auth();
     const image = req.file;
 
-    const { data: { text } } = await Tesseract.recognize(image.path, "eng");
+    const { data: { text } } = await Tesseract.recognize(image.path, "eng", {//Fix ServerLess Enviroment Issue 
+      corePath: "https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0/tesseract-core-simd.wasm"
+    });
 
     await sql`INSERT INTO creations (user_id, prompt, content, type)
         VALUES (${userId}, ${"Extracted text from image"}, ${text}, 'text')`;
