@@ -355,7 +355,7 @@ export const extractTextFromImage = async (req, res) => {
     const image = req.file;
 
     const { data: { text } } = await Tesseract.recognize(image.path, "eng", {//Fix ServerLess Enviroment Issue 
-      corePath: "https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0/tesseract-core-simd.wasm"
+      corePath: "/tesseract-core-simd.wasm"
     });
 
     await sql`INSERT INTO creations (user_id, prompt, content, type)
