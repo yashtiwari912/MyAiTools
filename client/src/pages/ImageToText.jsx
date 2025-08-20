@@ -26,10 +26,11 @@ const ImageToText = () => {
             const {
                 data: { text },
             } = await Tesseract.recognize(file, "eng", {
-                langPath: "/lang-data",
+
+                langPath: `${window.location.origin}/tessdata`,
             });
 
-
+            console.log(`${window.location.origin}/tessdata/eng.traineddata`);
             await axios.post(
                 "/api/ai/extract-text",
                 { text },
