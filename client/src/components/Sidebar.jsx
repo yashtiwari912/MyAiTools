@@ -1,5 +1,5 @@
 import { Protect, useClerk, useUser } from '@clerk/clerk-react'
-import { Eraser, FileText, Hash, House, Image, LogOut, Scissors, SquarePen, Users } from 'lucide-react';
+import { Eraser, FileText, Hash, House, Image, LogOut, Scissors, SquarePen, Users, Youtube } from 'lucide-react';
 import React from 'react'
 import { NavLink } from 'react-router-dom';
 
@@ -13,6 +13,7 @@ const navItems = [
     { to: '/ai/remove-object', lable: 'Remove Object', Icon: Scissors },
     { to: '/ai/review-resume', lable: 'Review Resume', Icon: FileText },
     { to: '/ai/pdf-summarizer', lable: 'DocuSense', Icon: FileText },
+    { to: '/ai/youtube-summarizer', lable: 'YouTube Summarizer', Icon: Youtube },
     { to: '/ai/community', lable: 'Community', Icon: Users },
 ]
 

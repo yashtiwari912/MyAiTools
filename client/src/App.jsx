@@ -15,6 +15,7 @@ import { useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
 import DocuSense from './pages/DocuSense'
 import ImageToText from './pages/ImageToText'
+import YouTubeSummarizer from './pages/YouTubeSummarizer'
 
 
 const App = () => {
@@ -33,7 +34,8 @@ const App = () => {
           <Route path="remove-background" element={<RemoveBackground />} />
           <Route path="remove-object" element={<RemoveObject />} />
           <Route path="review-resume" element={<ReviewResume />} />
-          <Route path="pdf-summarizer" element={<DocuSense />} /> 
+          <Route path="pdf-summarizer" element={<DocuSense />} />
+          <Route path="youtube-summarizer" element={<YouTubeSummarizer />} />
           <Route path="community" element={<Community />} />
         </Route>
       </Routes>
