@@ -8,7 +8,7 @@ import pdf from "pdf-parse/lib/pdf-parse.js";
 import FormData from "form-data";
 import { YoutubeTranscript } from "youtube-transcript";
 import ytdl from "ytdl-core";
-
+import QRCode from "qrcode";
 
 
 const AI = new OpenAI({
@@ -589,5 +589,74 @@ Answer clearly, cite approximate moments if it's a transcript, otherwise say "ba
   } catch (error) {
     console.error(error);
     res.json({ success: false, message: error.message });
+  }
+};
+
+
+
+
+/**
+ * POST /api/ai/qr-generate
+ * body: { text, size=512, margin=2, errorCorrectionLevel='M', format='png'|'svg', darkColor='#000', lightColor='#fff' }
+ */
+export const generateQr = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const plan = req.plan; // optional: can gate by plan if you want
+    // if (plan !== "premium") return res.json({ success:false, message:"Premium only" });
+
+    const {
+      text,
+      size = 512,
+      margin = 2,
+      errorCorrectionLevel = "M",
+      format = "png",
+      darkColor = "#000000",
+      lightColor = "#ffffff",
+    } = req.body || {};
+
+    if (!text || typeof text !== "string" || !text.trim()) {
+      return res.json({ success: false, message: "Text/URL is required" });
+    }
+
+    const clampedSize = Math.max(128, Math.min(1024, parseInt(size) || 512));
+    const clampedMargin = Math.max(0, Math.min(10, parseInt(margin) || 2));
+    const ecl = ["L", "M", "Q", "H"].includes(errorCorrectionLevel)
+      ? errorCorrectionLevel
+      : "M";
+    const fmt = ["png", "svg"].includes(format) ? format : "png";
+
+    const options = {
+      errorCorrectionLevel: ecl,
+      margin: clampedMargin,
+      color: { dark: darkColor, light: lightColor },
+      width: clampedSize,
+    };
+
+    if (fmt === "png") {
+      const pngBuffer = await QRCode.toBuffer(text, options);
+      const base64 = pngBuffer.toString("base64");
+      const dataUrl = `data:image/png;base64,${base64}`;
+
+      // store meta (avoid storing giant image in DB)
+      await sql`
+        INSERT INTO creations (user_id, prompt, content, type)
+        VALUES (${userId}, ${JSON.stringify({ text, options })}, ${"qr_generated_png"}, 'qr-code')
+      `;
+
+      return res.json({ success: true, format: "png", dataUrl });
+    } else {
+      const svg = await QRCode.toString(text, { ...options, type: "svg" });
+
+      await sql`
+        INSERT INTO creations (user_id, prompt, content, type)
+        VALUES (${userId}, ${JSON.stringify({ text, options })}, ${"qr_generated_svg"}, 'qr-code')
+      `;
+
+      return res.json({ success: true, format: "svg", svg });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.json({ success: false, message: error.message });
   }
 };

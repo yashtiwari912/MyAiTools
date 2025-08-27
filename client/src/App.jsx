@@ -16,6 +16,7 @@ import { Toaster } from 'react-hot-toast'
 import DocuSense from './pages/DocuSense'
 import ImageToText from './pages/ImageToText'
 import YouTubeSummarizer from './pages/YouTubeSummarizer'
+import QrGenerator from './pages/QrGenerator'
 
 
 const App = () => {
@@ -29,6 +30,7 @@ const App = () => {
           <Route index element={<Dashboard />} />
           <Route path="write-article" element={<WriteArticle />} />
           <Route path="blog-titles" element={<BlogTitles />} />
+          <Route path="qr-generator" element={<QrGenerator />} />
           <Route path="extract-text" element={<ImageToText />} />
           <Route path="generate-images" element={<GenerateImages />} />
           <Route path="remove-background" element={<RemoveBackground />} />

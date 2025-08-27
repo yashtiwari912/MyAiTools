@@ -5,6 +5,7 @@ import {
     generateArticle,
     generateBlogTitle,
     generateImage,
+    generateQr,
     pdfChat,
     pdfSummarizer,
     removeImageBackground,
@@ -38,4 +39,5 @@ aiRouter.post("/pdf-chat", auth, pdfChat);
 aiRouter.post("/extract-text", auth, extractTextFromImage);
 aiRouter.post("/youtube-summary", auth, youtubeSummarizer);
 aiRouter.post("/youtube-chat", auth, youtubeChat);
+aiRouter.post("/qr-generate", auth, generateQr);
 export default aiRouter;
