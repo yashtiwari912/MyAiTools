@@ -391,7 +391,15 @@ export async function fetchTranscriptText(url) {
   const langs = ["en", "en-US", "en-GB"];
   for (const lang of langs) {
     try {
-      const items = await YoutubeTranscript.fetchTranscript(url, { lang });
+      const items = await YoutubeTranscript.fetchTranscript(url, {
+        lang,
+        requestOptions: {
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
+          },
+        },
+      });
       if (items?.length) {
         return {
           text: items.map((i) => i.text).join(" "),
@@ -405,7 +413,14 @@ export async function fetchTranscriptText(url) {
 
   // 2) Fallback: Try video metadata (title + description)
   try {
-    const info = await ytdl.getBasicInfo(url); // lighter than getInfo
+    const info = await ytdl.getInfo(url, {
+      requestOptions: {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
+        },
+      },
+    }); // lighter than getInfo
     const title = info.videoDetails?.title || "";
     const description = info.videoDetails?.description || "";
 

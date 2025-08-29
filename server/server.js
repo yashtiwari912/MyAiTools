@@ -13,7 +13,8 @@ await connectCloudinary();
 app.use(cors({
   origin: [
     "https://my-ai-tools-seven.vercel.app", // frontend origin
-    "http://localhost:3000" // local dev
+    "http://localhost:3000",
+    "http://localhost:5173" // local dev
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
