@@ -6,6 +6,7 @@ import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 import pdf from "pdf-parse/lib/pdf-parse.js";
 import QRCode from "qrcode";
+import sharp from "sharp";
 
 
 const AI = new OpenAI({
@@ -195,6 +196,78 @@ export const removeImageObject = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
+
+
+export const compressResizeImage = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const { width, height, quality, format } = req.body;
+    const image = req.file;
+
+    if (!image) {
+      return res.json({ success: false, message: "No image uploaded" });
+    }
+
+
+    let transformer = sharp(image.path);
+    transformer = transformer.rotate();
+
+    // Resize if width/height given
+    if (width || height) {
+      transformer = transformer.resize(
+        width ? parseInt(width) : null,
+        height ? parseInt(height) : null,
+        { fit: "inside", withoutEnlargement: true }
+      );
+    }
+
+    // Ensure format
+    let outputFormat = format ? format.toLowerCase() : "jpeg";
+    let processedBuffer;
+
+    if (outputFormat === "jpeg" || outputFormat === "jpg") {
+      processedBuffer = await transformer
+        .jpeg({ quality: parseInt(quality) || 80, mozjpeg: true })
+        .toBuffer();
+      outputFormat = "jpg"; // cloudinary prefers "jpg"
+    } else if (outputFormat === "png") {
+      processedBuffer = await transformer
+        .png({ compressionLevel: 9, adaptiveFiltering: true })
+        .toBuffer();
+    } else if (outputFormat === "webp") {
+      processedBuffer = await transformer
+        .webp({ quality: parseInt(quality) || 80 })
+        .toBuffer();
+    } else {
+      processedBuffer = await transformer.toBuffer();
+    }
+
+    //  Upload buffer directly to Cloudinary
+    const uploaded = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { resource_type: "image", format: outputFormat },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      stream.end(processedBuffer);
+    });
+
+    //  Save in DB
+    await sql`
+      INSERT INTO creations (user_id, prompt, content, type)
+      VALUES (${userId}, ${"Compressed/Resized image"}, ${uploaded.secure_url}, 'image')
+    `;
+
+    res.json({ success: true, content: uploaded.secure_url });
+  } catch (error) {
+    console.error(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
 
 export const resumeReview = async (req, res) => {
   try {

@@ -10,6 +10,7 @@ const navItems = [
     { to: '/ai/qr-generator', lable: 'QR Generator', Icon: QrCode },
     { to: '/ai/extract-text', lable: 'Image to Text', Icon: Image },
     { to: '/ai/generate-images', lable: 'Generate Images', Icon: Image },
+    { to: '/ai/image-compressor', lable: 'Compress Resize', Icon: Image },
     { to: '/ai/remove-background', lable: 'Remove Background', Icon: Eraser },
     { to: '/ai/remove-object', lable: 'Remove Object', Icon: Scissors },
     { to: '/ai/review-resume', lable: 'Review Resume', Icon: FileText },

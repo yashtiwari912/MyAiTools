@@ -17,6 +17,7 @@ import DocuSense from './pages/DocuSense'
 import ImageToText from './pages/ImageToText'
 import YouTubeSummarizer from './pages/YouTubeSummarizer'
 import QrGenerator from './pages/QrGenerator'
+import ImageCompressor from './pages/ImageCompressor'
 
 
 const App = () => {
@@ -31,6 +32,7 @@ const App = () => {
           <Route path="write-article" element={<WriteArticle />} />
           <Route path="blog-titles" element={<BlogTitles />} />
           <Route path="qr-generator" element={<QrGenerator />} />
+          <Route path="image-compressor" element={<ImageCompressor />} />
           <Route path="extract-text" element={<ImageToText />} />
           <Route path="generate-images" element={<GenerateImages />} />
           <Route path="remove-background" element={<RemoveBackground />} />

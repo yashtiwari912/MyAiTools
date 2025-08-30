@@ -1,6 +1,7 @@
 import express from "express";
 import { auth } from "../middlewares/auth.js";
 import {
+    compressResizeImage,
     extractTextFromImage,
     generateArticle,
     generateBlogTitle,
@@ -32,6 +33,12 @@ aiRouter.post(
     upload.single("image"),
     auth,
     removeImageObject
+);
+aiRouter.post(
+    "/compress-resize-image",
+    upload.single("image"),
+    auth,
+    compressResizeImage
 );
 aiRouter.post("/resume-review", upload.single("resume"), auth, resumeReview);
 aiRouter.post("/summarize-pdf", upload.single("pdf"), auth, pdfSummarizer);
