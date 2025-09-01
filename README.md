@@ -1,6 +1,7 @@
 # 🧠 MyAiTools – One-Stop AI Productivity SaaS  
 
-**MyAiTools** is a scalable **PERN Stack SaaS platform** built with **TailwindCSS** that delivers **10+ AI-powered tools** for content generation, image editing, and productivity enhancement — all within a seamless user experience.  
+**MyAiTools** is a scalable **PERN Stack SaaS platform** with a **modern UI powered by TailwindCSS**.  
+It delivers **10+ AI-powered tools** for content generation, image editing, and productivity enhancement — all brought together in a seamless and intuitive user experience.   
 
 ---
 
