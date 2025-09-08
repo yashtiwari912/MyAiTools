@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Loader2, Download, ImageIcon, Sparkles } from "lucide-react";
+import { Loader2, Download, ImageIcon, Sparkles, Pointer } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@clerk/clerk-react";
 
@@ -216,14 +216,14 @@ const ImageCompressor = () => {
                             />
                         </div>
 
-                        {/* ✅ Direct download will now work */}
                         <a
-                            onClick={handleDownload}
-                            className="mt-4 w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg"
-                        >
-                            <Download className="w-5 h-5" />
-                            Download {format.toUpperCase()}
-                        </a>
+                                onClick={handleDownload}
+                                className="mt-4 w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg cursor-pointer"
+                            >
+                                <Download className="w-5 h-5" />
+                                Download {format.toUpperCase()}
+                            </a>
+
                     </div>
                 )}
             </div>

@@ -11,15 +11,12 @@ const app = express();
 await connectCloudinary();
 
 app.use(cors({
-  origin: [
-    "https://my-ai-tools-seven.vercel.app", // frontend Vercel origin
-    "https://myaitools-uqpd.onrender.com",  // frontend Render origin
-    "http://localhost:3000",  //Local dev
-    "http://localhost:5173" // local dev
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: process.env.ALLOWED_ORIGINS.split(","),
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
+
 app.use(express.json());
 app.use(clerkMiddleware());
 
