@@ -20,7 +20,7 @@ app.use(cors({
 app.use(express.json());
 app.use(clerkMiddleware());
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
 app.get("/", (req, res) => {
   res.send("Server is Live!");

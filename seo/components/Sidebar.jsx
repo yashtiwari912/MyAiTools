@@ -1,0 +1,76 @@
+"use client";
+import Link from "next/link";
+import Image from "next/image";
+import { Protect, useClerk, useUser } from "@clerk/nextjs";
+import { Eraser, FileText, Hash, House, Image as ImageIcon, LogOut, QrCode, Scissors, SquarePen, Users, Youtube } from 'lucide-react';
+
+const navItems = [
+  { to: '/ai', lable: 'Dashboard', Icon: House },
+  { to: '/ai/write-article', lable: 'Write Article', Icon: SquarePen },
+  { to: '/ai/blog-titles', lable: 'Blog Titles', Icon: Hash },
+  { to: '/ai/qr-generator', lable: 'QR Generator', Icon: QrCode },
+  { to: '/ai/extract-text', lable: 'Image to Text', Icon: ImageIcon },
+  { to: '/ai/generate-images', lable: 'Generate Images', Icon: ImageIcon },
+  { to: '/ai/image-compressor', lable: 'Compress Resize', Icon: ImageIcon },
+  { to: '/ai/remove-background', lable: 'Remove Background', Icon: Eraser },
+  { to: '/ai/remove-object', lable: 'Remove Object', Icon: Scissors },
+  { to: '/ai/review-resume', lable: 'Review Resume', Icon: FileText },
+  { to: '/ai/pdf-summarizer', lable: 'DocuSense', Icon: FileText },
+  { to: '/ai/youtube-summarizer', lable: 'YouTube Summarizer', Icon: Youtube },
+  { to: '/ai/community', lable: 'Community', Icon: Users },
+];
+
+export default function Sidebar({ sidebar, setSidebar }) {
+  const { user } = useUser();
+  const { signOut, openUserProfile } = useClerk();
+
+  return (
+    <div
+      className={`w-64 bg-white border-r border-gray-200 flex flex-col justify-between 
+                max-sm:absolute top-14 bottom-0  
+                ${sidebar ? 'translate-x-0' : 'max-sm:-translate-x-full'} 
+                transition-all duration-300 ease-in-out shadow-md`}
+    >
+      <div className="my-7 px-5 w-full overflow-y-auto">
+        {user && (
+          <>
+            <Image src={user.imageUrl} alt="User avatar" width={64} height={64} className='w-16 h-16 object-cover rounded-full mx-auto shadow' />
+            <h1 className="mt-2 text-center font-semibold">{user.fullName}</h1>
+          </>
+        )}
+
+        <div className="mt-8 space-y-2">
+          {navItems.map(({ to, lable, Icon }) => (
+            <Link
+              key={to}
+              href={to}
+              onClick={() => setSidebar(false)}
+              className={`px-5 py-2.5 flex items-center gap-4 rounded-lg transition-all hover:bg-gray-100 text-gray-700`}
+            >
+              <Icon className="w-5 h-5" />
+              <span className="text-sm font-medium">{lable}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {user && (
+        <div className='w-full border-t border-gray-200 px-5 py-4 flex items-center justify-between'>
+          <div
+            onClick={openUserProfile}
+            className='flex gap-3 items-center cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition'
+          >
+            <Image src={user.imageUrl} alt="" width={40} height={40} className="w-10 h-10 rounded-full shadow" />
+            <div>
+              <h1 className="text-sm font-medium">{user.fullName}</h1>
+              <p className='text-xs text-gray-500'>
+                <Protect plan='premium' fallback="Free">Premium</Protect> plan
+              </p>
+            </div>
+          </div>
+          <LogOut onClick={signOut} className='w-5 text-gray-400 hover:text-red-500 transition cursor-pointer' />
+        </div>
+      )}
+    </div>
+  );
+}
