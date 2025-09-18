@@ -8,7 +8,7 @@ export const assets = {
   arrow_icon: '/assets/arrow_icon.svg',
 };
 
-import { SquarePen, Hash, Image as ImageIcon, Eraser, Scissors, FileText } from 'lucide-react';
+import { SquarePen, Hash, Image as ImageIcon, Eraser, Scissors, FileText, Youtube, QrCode, Users } from 'lucide-react';
 
 export const AiToolsData = [
   {
@@ -52,6 +52,48 @@ export const AiToolsData = [
     Icon: FileText,
     bg: { from: '#12B7AC', to: '#08B6CE' },
     path: '/ai/review-resume',
+  },
+  {
+    title: 'Image to Text (OCR)',
+    description: 'Extract text from images using fast, accurate OCR powered by Tesseract.',
+    Icon: FileText,
+    bg: { from: '#F6AB41', to: '#FF4938' },
+    path: '/ai/extract-text',
+  },
+  {
+    title: 'Image Compressor & Resizer',
+    description: 'Compress and resize images without losing quality. Choose size, quality and format.',
+    Icon: ImageIcon,
+    bg: { from: '#7C3AED', to: '#4C1D95' },
+    path: '/ai/image-compressor',
+  },
+  {
+    title: 'PDF Summarizer',
+    description: 'Upload a PDF to get a concise summary and chat with the document contents.',
+    Icon: FileText,
+    bg: { from: '#6366F1', to: '#A855F7' },
+    path: '/ai/pdf-summarizer',
+  },
+  {
+    title: 'YouTube Summarizer',
+    description: 'Paste a YouTube link to generate summaries and ask questions about the video.',
+    Icon: Youtube,
+    bg: { from: '#EF4444', to: '#F59E0B' },
+    path: '/ai/youtube-summarizer',
+  },
+  {
+    title: 'QR Code Generator',
+    description: 'Create customizable QR codes in PNG or SVG for links, text and more.',
+    Icon: QrCode,
+    bg: { from: '#0EA5E9', to: '#22D3EE' },
+    path: '/ai/qr-generator',
+  },
+  {
+    title: 'Community Showcase',
+    description: 'Explore published creations from the community and show your appreciation.',
+    Icon: Users,
+    bg: { from: '#10B981', to: '#059669' },
+    path: '/ai/community',
   },
 ];
 

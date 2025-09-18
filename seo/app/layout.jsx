@@ -5,6 +5,11 @@ import { Toaster } from "react-hot-toast";
 export const metadata = {
   title: "ContentAI - AI Tools",
   description: "AI-powered content creation and image tools",
+  icons: {
+    icon: "/assets/logo.svg",
+    shortcut: "/assets/logo.svg",
+    apple: "/assets/logo.svg",
+  },
 };
 
 export default function RootLayout({ children }) {
