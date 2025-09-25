@@ -41,7 +41,7 @@ export default function AiLayout({ children }) {
 
       <div className="flex-1 w-full flex h-[calc(100vh-64px)]">
         <Sidebar sidebar={sidebar} setSidebar={setSidebar} />
-        <div className="flex-1 bg-[#F4F7FB] overflow-hidden">{children}</div>
+        <div className="flex-1 bg-[#F4F7FB] overflow-hidden relative z-0">{children}</div>
       </div>
     </div>
   );

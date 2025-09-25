@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Protect, useClerk, useUser } from "@clerk/nextjs";
 import { Eraser, FileText, Hash, House, Image as ImageIcon, LogOut, QrCode, Scissors, SquarePen, Users, Youtube } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 const navItems = [
   { to: '/ai', lable: 'Dashboard', Icon: House },
@@ -23,11 +24,12 @@ const navItems = [
 export default function Sidebar({ sidebar, setSidebar }) {
   const { user } = useUser();
   const { signOut, openUserProfile } = useClerk();
+  const pathname = usePathname();
 
   return (
     <div
       className={`w-64 bg-white border-r border-gray-200 flex flex-col justify-between 
-                max-sm:absolute top-14 bottom-0  
+                max-sm:fixed top-14 bottom-0 left-0 z-50 
                 ${sidebar ? 'translate-x-0' : 'max-sm:-translate-x-full'} 
                 transition-all duration-300 ease-in-out shadow-md`}
     >
@@ -40,17 +42,24 @@ export default function Sidebar({ sidebar, setSidebar }) {
         )}
 
         <div className="mt-8 space-y-2">
-          {navItems.map(({ to, lable, Icon }) => (
-            <Link
-              key={to}
-              href={to}
-              onClick={() => setSidebar(false)}
-              className={`px-5 py-2.5 flex items-center gap-4 rounded-lg transition-all hover:bg-gray-100 text-gray-700`}
-            >
-              <Icon className="w-5 h-5" />
-              <span className="text-sm font-medium">{lable}</span>
-            </Link>
-          ))}
+          {navItems.map(({ to, lable, Icon }) => {
+            const active = to === '/ai' ? pathname === '/ai' : pathname.startsWith(to);
+            return (
+              <Link
+                key={to}
+                href={to}
+                onClick={() => setSidebar(false)}
+                className={`px-5 py-2.5 flex items-center gap-4 rounded-lg transition-all 
+                  ${active
+                    ? 'bg-gradient-to-r from-[#3C81F6] to-[#9234EA] text-white shadow-md'
+                    : 'hover:bg-gray-100 text-gray-700'}
+                `}
+              >
+                <Icon className="w-5 h-5" />
+                <span className="text-sm font-medium">{lable}</span>
+              </Link>
+            );
+          })}
         </div>
       </div>
 
