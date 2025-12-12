@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
 import sql from "../configs/db.js";
 import { clerkClient } from "@clerk/express";
 import axios from "axios";
@@ -9,9 +9,8 @@ import QRCode from "qrcode";
 import sharp from "sharp";
 
 
-const AI = new OpenAI({
+const AI = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
-  baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
 });
 
 export const generateArticle = async (req, res) => {
@@ -28,13 +27,13 @@ export const generateArticle = async (req, res) => {
       });
     }
 
-    const response = await AI.chat.completions.create({
-      model: "gemini-2.0-flash",
-      messages: [{ role: "user", content: prompt }],
+    const response = await AI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      maxOutputTokens: 1000,
       temperature: 0.7,
-      max_tokens: length,
     });
-    const content = response.choices[0].message.content;
+    const content = response.text;
     await sql`INSERT INTO creations (user_id,prompt,content,type) VALUES (${userId},${prompt},${content},'article')`;
 
     if (plan !== "premium") {
@@ -64,13 +63,13 @@ export const generateBlogTitle = async (req, res) => {
       });
     }
 
-    const response = await AI.chat.completions.create({
-      model: "gemini-2.0-flash",
-      messages: [{ role: "user", content: prompt }],
+    const response = await AI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      maxOutputTokens: 1000,
       temperature: 0.7,
-      max_tokens: 100,
     });
-    const content = response.choices[0].message.content;
+    const content = response.text;
 
     await sql`INSERT INTO creations (user_id,prompt,content,type) VALUES (${userId},${prompt},${content},'blog-title')`;
 
@@ -295,20 +294,14 @@ export const resumeReview = async (req, res) => {
     const prompt = `Review the following resume and provide constructive feedback on its strengths, 
         weaknesses, and areas of improvement. ResumeContent:\n\n${pdfData.text}`;
 
-    const response = await AI.chat.completions.create({
-      model: "gemini-2.0-flash",
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
+    const response = await AI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      maxOutputTokens: 1000,
       temperature: 0.7,
-      max_tokens: 1000,
     });
 
-    const content = response.choices[0].message.content;
-
+    const content = response.text;
     await sql` INSERT INTO creations (user_id, prompt, content, type) 
         VALUES (${userId}, 'Review the uploaded resume', ${content}, 'resume-review')`;
 
@@ -347,14 +340,14 @@ export const pdfSummarizer = async (req, res) => {
 
     const prompt = `Summarize the following PDF content into key points:\n\n${pdfData.text}`;
 
-    const response = await AI.chat.completions.create({
-      model: "gemini-2.0-flash",
-      messages: [{ role: "user", content: prompt }],
+    const response = await AI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      maxOutputTokens: 1000,
       temperature: 0.7,
-      max_tokens: 800,
     });
 
-    const content = response.choices[0].message.content;
+    const content = response.text;
 
     await sql`
       INSERT INTO creations (user_id, prompt, content, type) 
@@ -400,14 +393,14 @@ export const pdfChat = async (req, res) => {
     User Question: ${question}\n
     Answer clearly and concisely:`;
 
-    const response = await AI.chat.completions.create({
-      model: "gemini-2.0-flash",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.5,
-      max_tokens: 1000,
+    const response = await AI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      maxOutputTokens: 1000,
+      temperature: 0.7,
     });
 
-    const content = response.choices[0].message.content;
+    const content = response.text;
 
     await sql`
       INSERT INTO creations (user_id, prompt, content, type) 
@@ -577,40 +570,63 @@ async function summarizeTranscriptLong(transcript, detail) {
   const partials = [];
 
   for (const [idx, chunk] of chunks.entries()) {
-    const stepPrompt = `You are a precise note-maker.
-Chunk ${idx + 1}/${chunks.length} of YouTube metadata is below.
-Summarize ONLY this chunk into sharp bullet notes. Avoid repetition.
+    const stepPrompt = `
+You are a highly capable summarization assistant.
+
+You will be given Chunk ${idx + 1}/${chunks.length} of YouTube video metadata  
+(title, description, tags, statistics, comments, etc.).
+
+Your job:
+- Extract the **most important points**.
+- Use the metadata as the **primary source**, but you MAY use general reasoning  
+  if the chunk clearly lacks enough information.
+- Avoid repetition.
+- Keep the notes crisp and meaningful.
 
 Chunk:
 """
 ${chunk}
 """
-Return bullets only.`;
 
-    const r = await AI.chat.completions.create({
-      model: "gemini-2.0-flash",
-      messages: [{ role: "user", content: stepPrompt }],
-      temperature: 0.5,
-      max_tokens: 800,
+Now produce **clean bullet points** summarizing this chunk.
+`;
+
+    const response = await AI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: stepPrompt,
+      maxOutputTokens: 1000,
+      temperature: 0.7,
     });
-    partials.push(r.choices[0].message.content);
+    partials.push(response.text);
   }
 
-  const combinePrompt = `You are combining notes into a final YouTube video summary.
+  const combinePrompt = `
+You are combining partial notes into a complete, polished YouTube summary.
+
+Use the metadata-derived notes below as your foundation,  
+BUT you may use your own reasoning and knowledge to:
+- clarify unclear parts
+- restructure information
+- fill small gaps logically (without inventing false facts)
+
+Follow this summarization style:
 ${detailToInstructions(detail)}
 
-Chunk notes:
+Here are the chunk summaries:
+--------------------------------
 ${partials.join("\n\n---\n\n")}
+--------------------------------
 
-Final summary:`;
+Now produce the **final high-quality YouTube summary**.
+`;
 
-  const final = await AI.chat.completions.create({
-    model: "gemini-2.0-flash",
-    messages: [{ role: "user", content: combinePrompt }],
-    temperature: 0.5,
-    max_tokens: 1200,
+  const final = await AI.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: combinePrompt,
+    maxOutputTokens: 1000,
+    temperature: 0.7,
   });
-  return final.choices[0].message.content;
+  return final.text;
 }
 
 /** --------- POST /api/ai/youtube-summary --------- */
@@ -661,25 +677,39 @@ export const youtubeChat = async (req, res) => {
     if (!transcript)
       return res.json({ success: false, message: "Please summarize first." });
 
-    const prompt = `You are a helpful assistant that answers strictly from the given YouTube metadata (title, description, tags, stats, and top comments).
-If an answer is not found in metadata, say so.
+    const prompt = `
+You are an intelligent assistant helping the user understand YouTube video information.
 
-Metadata:
+You have been provided the video's metadata (title, description, tags, stats, key comments, summary).  
+Use this metadata **whenever it is relevant or helpful**.
+
+However, you are **not restricted to metadata only** —  
+you may use your own general knowledge and reasoning **when metadata is incomplete, missing, or not detailed enough**.
+
+Always answer:
+- Clearly
+- Concisely
+- Helpfully
+
+Here is the available metadata:
 """
 ${transcript}
 """
 
 User question: "${question}"
-Answer clearly and concisely.`;
 
-    const r = await AI.chat.completions.create({
-      model: "gemini-2.0-flash",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.4,
-      max_tokens: 900,
+Now provide the best possible answer using metadata + your own reasoning.
+`;
+
+
+    const response = await AI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      maxOutputTokens: 1000,
+      temperature: 0.7,
     });
 
-    const answer = r.choices[0].message.content;
+    const answer = response.text;
 
     await sql`
       INSERT INTO creations (user_id, prompt, content, type)
@@ -738,7 +768,7 @@ export const generateQr = async (req, res) => {
       const base64 = pngBuffer.toString("base64");
       const dataUrl = `data:image/png;base64,${base64}`;
 
-      // store meta (avoid storing giant image in DB)
+
       await sql`
         INSERT INTO creations (user_id, prompt, content, type)
         VALUES (${userId}, ${JSON.stringify({ text, options })}, ${"qr_generated_png"}, 'qr-code')
